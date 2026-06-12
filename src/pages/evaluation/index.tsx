@@ -3,8 +3,7 @@ import { View, Text, Image, Textarea } from '@tarojs/components';
 import Taro, { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
-import { getOrderById } from '@/data/orders';
-import { mockMaintainers } from '@/data/users';
+import { useApp } from '@/store/app-context';
 
 const scoreLabels = [
   { score: 1, label: '很差', icon: '😞' },
@@ -25,15 +24,14 @@ const quickTags = [
 
 const EvaluationPage: React.FC = () => {
   const router = useRouter();
+  const { getOrderById, submitEvaluation, refreshOrders } = useApp();
   const orderId = router.params.orderId || '1';
   const order = getOrderById(orderId);
 
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(order?.evaluation?.score || 0);
   const [hoverScore, setHoverScore] = useState(0);
-  const [feedback, setFeedback] = useState('');
+  const [feedback, setFeedback] = useState(order?.evaluation?.content || '');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-
-  const maintainer = mockMaintainers[0];
 
   const handleStarClick = (value: number) => {
     setScore(value);
@@ -53,6 +51,10 @@ const EvaluationPage: React.FC = () => {
       return;
     }
 
+    const fullContent = selectedTags.length > 0
+      ? `${selectedTags.join('、')}${feedback ? '。' + feedback : ''}`
+      : (feedback || '用户未填写详细评价');
+
     Taro.showModal({
       title: '确认提交',
       content: '确认提交评价吗？提交后无法修改。',
@@ -61,17 +63,23 @@ const EvaluationPage: React.FC = () => {
       success: (res) => {
         if (res.confirm) {
           Taro.showLoading({ title: '提交中...' });
+          submitEvaluation({
+            orderId,
+            score,
+            content: fullContent
+          });
           setTimeout(() => {
             Taro.hideLoading();
+            refreshOrders();
             Taro.showToast({
               title: '评价成功',
               icon: 'success',
-              duration: 2000
+              duration: 1500
             });
             setTimeout(() => {
               Taro.navigateBack();
-            }, 2000);
-          }, 1000);
+            }, 1500);
+          }, 800);
         }
       }
     });
@@ -79,6 +87,68 @@ const EvaluationPage: React.FC = () => {
 
   const displayScore = hoverScore || score;
   const currentLabel = scoreLabels.find(l => l.score === displayScore);
+
+  if (order?.evaluation) {
+    return (
+      <View className={styles.page}>
+        {order && (
+          <View className={styles.section}>
+            <View className={styles.sectionHeader}>
+              <Text className={styles.title}>📋 工单信息</Text>
+            </View>
+            <View className={styles.sectionBody}>
+              <View className={styles.orderInfo}>
+                <View className={styles.infoRow}>
+                  <Text className={styles.label}>工单编号</Text>
+                  <Text className={styles.value}>{order.orderNo}</Text>
+                </View>
+                <View className={styles.infoRow}>
+                  <Text className={styles.label}>设备名称</Text>
+                  <Text className={styles.value}>{order.assetName}</Text>
+                </View>
+                <View className={styles.infoRow}>
+                  <Text className={styles.label}>完成时间</Text>
+                  <Text className={styles.value}>{order.completedTime || '-'}</Text>
+                </View>
+              </View>
+            </View>
+          </View>
+        )}
+
+        <View className={styles.section}>
+          <View className={styles.sectionHeader}>
+            <Text className={styles.title}>⭐ 我的评价</Text>
+          </View>
+          <View className={styles.sectionBody}>
+            <View style={{
+              background: 'linear-gradient(135deg, rgba(22, 93, 255, 0.05) 0%, rgba(64, 128, 255, 0.05) 100%)',
+              borderRadius: '12rpx',
+              padding: '32rpx'
+            }}>
+              <View style={{ display: 'flex', alignItems: 'center', marginBottom: '24rpx' }}>
+                <View style={{ display: 'flex', gap: '8rpx' }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <Text key={star} style={{ fontSize: '36rpx' }}>
+                      {star <= order.evaluation!.score ? '⭐' : '☆'}
+                    </Text>
+                  ))}
+                </View>
+                <Text style={{ marginLeft: '24rpx', fontSize: '28rpx', color: '#4e5969' }}>
+                  {order.evaluation.score}分
+                </Text>
+              </View>
+              <Text style={{ fontSize: '28rpx', color: '#4e5969', lineHeight: 1.6 }}>
+                {order.evaluation.content}
+              </Text>
+              <Text style={{ fontSize: '22rpx', color: '#86909c', marginTop: '16rpx', display: 'block' }}>
+                {order.evaluation.time}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View className={styles.page}>
@@ -114,12 +184,12 @@ const EvaluationPage: React.FC = () => {
           <View className={styles.repairerInfo}>
             <Image
               className={styles.avatar}
-              src={maintainer.avatar}
+              src="https://picsum.photos/id/1005/200/200"
               mode="aspectFill"
             />
             <View className={styles.info}>
-              <Text className={styles.name}>{maintainer.name}</Text>
-              <Text className={styles.dept}>{maintainer.department}</Text>
+              <Text className={styles.name}>{order?.maintainer || '维修人员'}</Text>
+              <Text className={styles.dept}>设备维护部</Text>
             </View>
           </View>
         </View>

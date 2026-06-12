@@ -5,12 +5,11 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import OrderCard from '@/components/OrderCard';
 import Empty from '@/components/Empty';
-import { mockOrders } from '@/data/orders';
 import { WorkOrder } from '@/types';
 import { useApp } from '@/store/app-context';
 
 const OrdersPage: React.FC = () => {
-  const { user } = useApp();
+  const { user, orders: allOrders } = useApp();
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [orders, setOrders] = useState<WorkOrder[]>([]);
@@ -20,7 +19,7 @@ const OrdersPage: React.FC = () => {
   });
 
   const loadOrders = () => {
-    setOrders([...mockOrders]);
+    setOrders([...allOrders]);
   };
 
   const filteredOrders = useMemo(() => {

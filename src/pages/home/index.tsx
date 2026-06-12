@@ -5,11 +5,10 @@ import { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import OrderCard from '@/components/OrderCard';
 import { useApp } from '@/store/app-context';
-import { mockOrders } from '@/data/orders';
 import { WorkOrder } from '@/types';
 
 const HomePage: React.FC = () => {
-  const { user } = useApp();
+  const { user, orders } = useApp();
   const [recentOrders, setRecentOrders] = useState<WorkOrder[]>([]);
 
   useDidShow(() => {
@@ -17,19 +16,19 @@ const HomePage: React.FC = () => {
   });
 
   const loadData = () => {
-    const myOrders = mockOrders.filter(order => order.applicant === user.name);
+    const myOrders = orders.filter(order => order.applicant === user.name);
     setRecentOrders(myOrders.slice(0, 3));
   };
 
   const stats = useMemo(() => {
-    const myOrders = mockOrders.filter(order => order.applicant === user.name);
+    const myOrders = orders.filter(order => order.applicant === user.name);
     return {
       total: myOrders.length,
       pending: myOrders.filter(o => o.status === 'pending').length,
       processing: myOrders.filter(o => o.status === 'processing').length,
       completed: myOrders.filter(o => o.status === 'completed' || o.status === 'closed').length
     };
-  }, [user.name]);
+  }, [user.name, orders]);
 
   const handleScanRepair = () => {
     Taro.navigateTo({

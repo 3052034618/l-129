@@ -5,14 +5,13 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import OrderCard from '@/components/OrderCard';
 import Empty from '@/components/Empty';
-import { mockOrders } from '@/data/orders';
 import { WorkOrder } from '@/types';
 import { useApp } from '@/store/app-context';
 
 type TabType = 'pending' | 'processing' | 'completed';
 
 const BoardPage: React.FC = () => {
-  const { user } = useApp();
+  const { user, orders: allOrders, acceptOrder, refreshOrders } = useApp();
   const [activeTab, setActiveTab] = useState<TabType>('pending');
   const [locationFilter, setLocationFilter] = useState('全部位置');
   const [typeFilter, setTypeFilter] = useState('全部类型');
@@ -24,7 +23,8 @@ const BoardPage: React.FC = () => {
   });
 
   const loadOrders = () => {
-    setOrders([...mockOrders]);
+    refreshOrders();
+    setOrders([...allOrders]);
   };
 
   const filteredOrders = useMemo(() => {
@@ -70,6 +70,10 @@ const BoardPage: React.FC = () => {
       confirmColor: '#165dff',
       success: (res) => {
         if (res.confirm) {
+          acceptOrder({
+            orderId: order.id,
+            maintainer: user.name
+          });
           Taro.showToast({
             title: '接单成功',
             icon: 'success',

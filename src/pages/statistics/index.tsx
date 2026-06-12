@@ -1,31 +1,35 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
+import Taro, { useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
-import { mockOrders } from '@/data/orders';
-import { WorkOrder, PriorityLevel } from '@/types';
+import { PriorityLevel } from '@/types';
 import { useApp } from '@/store/app-context';
 
 type TabType = 'overview' | 'fault' | 'efficiency';
 
 const StatisticsPage: React.FC = () => {
-  const { user } = useApp();
+  const { user, orders, refreshOrders } = useApp();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
 
-  const stats = useMemo(() => {
-    const total = mockOrders.length;
-    const pending = mockOrders.filter(o => o.status === 'pending').length;
-    const processing = mockOrders.filter(o => o.status === 'processing').length;
-    const completed = mockOrders.filter(o => o.status === 'completed' || o.status === 'closed').length;
+  useDidShow(() => {
+    refreshOrders();
+  });
 
-    const unresponsive = mockOrders.filter(o => {
+  const stats = useMemo(() => {
+    const total = orders.length;
+    const pending = orders.filter(o => o.status === 'pending').length;
+    const processing = orders.filter(o => o.status === 'processing').length;
+    const completed = orders.filter(o => o.status === 'completed' || o.status === 'closed').length;
+
+    const unresponsive = orders.filter(o => {
       if (o.status !== 'pending') return false;
       const applyTime = new Date(o.applyTime).getTime();
       const now = new Date('2024-06-01 12:00:00').getTime();
       return (now - applyTime) > 2 * 60 * 60 * 1000;
     }).length;
 
-    const timeout = mockOrders.filter(o => {
+    const timeout = orders.filter(o => {
       if (o.status === 'completed' || o.status === 'closed') {
         if (!o.acceptTime || !o.completedTime) return false;
         const acceptTime = new Date(o.acceptTime).getTime();
@@ -46,7 +50,7 @@ const StatisticsPage: React.FC = () => {
     }).length;
 
     const assetCountMap: Record<string, { count: number; name: string; location: string }> = {};
-    mockOrders.forEach(order => {
+    orders.forEach(order => {
       if (!assetCountMap[order.assetId]) {
         assetCountMap[order.assetId] = {
           count: 0,
@@ -60,7 +64,7 @@ const StatisticsPage: React.FC = () => {
       .filter(item => item.count > 1)
       .sort((a, b) => b.count - a.count);
 
-    const evaluatedOrders = mockOrders.filter(o => o.evaluation);
+    const evaluatedOrders = orders.filter(o => o.evaluation);
     const avgScore = evaluatedOrders.length > 0
       ? evaluatedOrders.reduce((sum, o) => sum + (o.evaluation?.score || 0), 0) / evaluatedOrders.length
       : 0;
@@ -68,7 +72,7 @@ const StatisticsPage: React.FC = () => {
       ? Math.round(evaluatedOrders.filter(o => (o.evaluation?.score || 0) >= 4).length / evaluatedOrders.length * 100)
       : 0;
 
-    const completedWithTime = mockOrders.filter(o => o.acceptTime && o.completedTime);
+    const completedWithTime = orders.filter(o => o.acceptTime && o.completedTime);
     const avgRepairTime = completedWithTime.length > 0
       ? completedWithTime.reduce((sum, o) => {
           const accept = new Date(o.acceptTime!).getTime();
@@ -77,7 +81,7 @@ const StatisticsPage: React.FC = () => {
         }, 0) / completedWithTime.length
       : 0;
 
-    const pendingWithTime = mockOrders.filter(o => o.status === 'pending');
+    const pendingWithTime = orders.filter(o => o.status === 'pending');
     const avgResponseTime = pendingWithTime.length > 0
       ? pendingWithTime.reduce((sum, o) => {
           const apply = new Date(o.applyTime).getTime();
@@ -100,11 +104,11 @@ const StatisticsPage: React.FC = () => {
       avgRepairTime: Math.round(avgRepairTime),
       avgResponseTime: Math.round(avgResponseTime)
     };
-  }, []);
+  }, [orders]);
 
   const faultTypeStats = useMemo(() => {
     const typeMap: Record<string, number> = {};
-    mockOrders.forEach(order => {
+    orders.forEach(order => {
       typeMap[order.faultType] = (typeMap[order.faultType] || 0) + 1;
     });
     const maxCount = Math.max(...Object.values(typeMap), 1);
@@ -115,7 +119,7 @@ const StatisticsPage: React.FC = () => {
         percentage: Math.round(count / maxCount * 100)
       }))
       .sort((a, b) => b.count - a.count);
-  }, []);
+  }, [orders]);
 
   const priorityStats = useMemo(() => {
     const priorityMap: Record<PriorityLevel, number> = {
@@ -124,7 +128,7 @@ const StatisticsPage: React.FC = () => {
       medium: 0,
       low: 0
     };
-    mockOrders.forEach(order => {
+    orders.forEach(order => {
       priorityMap[order.priority]++;
     });
     const priorityLabels: Record<PriorityLevel, string> = {
@@ -145,11 +149,11 @@ const StatisticsPage: React.FC = () => {
       count: priorityMap[priority],
       color: priorityColors[priority]
     }));
-  }, []);
+  }, [orders]);
 
   const locationStats = useMemo(() => {
     const locationMap: Record<string, number> = {};
-    mockOrders.forEach(order => {
+    orders.forEach(order => {
       const building = order.location.split('-')[0];
       locationMap[building] = (locationMap[building] || 0) + 1;
     });
@@ -161,7 +165,7 @@ const StatisticsPage: React.FC = () => {
         percentage: Math.round(count / maxCount * 100)
       }))
       .sort((a, b) => b.count - a.count);
-  }, []);
+  }, [orders]);
 
   const tabs: { key: TabType; label: string }[] = [
     { key: 'overview', label: '概览' },
@@ -170,7 +174,7 @@ const StatisticsPage: React.FC = () => {
   ];
 
   const unresponsiveOrders = useMemo(() => {
-    return mockOrders
+    return orders
       .filter(o => {
         if (o.status !== 'pending') return false;
         const applyTime = new Date(o.applyTime).getTime();
@@ -178,10 +182,10 @@ const StatisticsPage: React.FC = () => {
         return (now - applyTime) > 2 * 60 * 60 * 1000;
       })
       .sort((a, b) => new Date(a.applyTime).getTime() - new Date(b.applyTime).getTime());
-  }, []);
+  }, [orders]);
 
   const timeoutOrders = useMemo(() => {
-    return mockOrders.filter(o => {
+    return orders.filter(o => {
       if (o.status === 'completed' || o.status === 'closed') {
         if (!o.acceptTime || !o.completedTime) return false;
         const acceptTime = new Date(o.acceptTime).getTime();
@@ -200,7 +204,7 @@ const StatisticsPage: React.FC = () => {
       }
       return false;
     });
-  }, []);
+  }, [orders]);
 
   return (
     <ScrollView scrollY className={styles.page}>

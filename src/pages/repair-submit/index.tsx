@@ -18,7 +18,7 @@ const faultTypes = ['机械故障', '电气故障', '软件故障', '设备保�
 
 const RepairSubmitPage: React.FC = () => {
   const router = useRouter();
-  const { user } = useApp();
+  const { user, addOrder } = useApp();
   const [asset, setAsset] = useState<Asset | null>(null);
   const [faultType, setFaultType] = useState('');
   const [faultDescription, setFaultDescription] = useState('');
@@ -114,17 +114,31 @@ const RepairSubmitPage: React.FC = () => {
       success: (res) => {
         if (res.confirm) {
           Taro.showLoading({ title: '提交中...' });
+          const newOrder = addOrder({
+            assetId: asset.id,
+            assetName: asset.name,
+            assetCode: asset.code,
+            location: asset.location,
+            faultType,
+            faultDescription: faultDescription.trim(),
+            photos,
+            priority,
+            applicant: user.name,
+            applicantPhone: user.phone
+          });
           setTimeout(() => {
             Taro.hideLoading();
             Taro.showToast({
               title: '提交成功',
               icon: 'success',
-              duration: 2000
+              duration: 1500
             });
             setTimeout(() => {
-              Taro.navigateBack();
-            }, 2000);
-          }, 1000);
+              Taro.redirectTo({
+                url: `/pages/order-detail/index?id=${newOrder.id}`
+              });
+            }, 1500);
+          }, 800);
         }
       }
     });

@@ -4,7 +4,6 @@ import Taro, { useRouter } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useApp } from '@/store/app-context';
-import { getOrderById } from '@/data/orders';
 
 interface PartItem {
   id: string;
@@ -15,7 +14,7 @@ interface PartItem {
 
 const SparePartsPage: React.FC = () => {
   const router = useRouter();
-  const { user } = useApp();
+  const { user, getOrderById, addSpareParts, refreshOrders } = useApp();
   const orderId = router.params.orderId || '1';
   const order = getOrderById(orderId);
 
@@ -98,17 +97,27 @@ const SparePartsPage: React.FC = () => {
       success: (res) => {
         if (res.confirm) {
           Taro.showLoading({ title: '提交中...' });
+          addSpareParts({
+            orderId,
+            parts: parts.map(p => ({
+              name: p.name.trim(),
+              quantity: p.quantity,
+              estimatedArrival: p.estimatedArrival
+            })),
+            applicant: user.name
+          });
           setTimeout(() => {
             Taro.hideLoading();
+            refreshOrders();
             Taro.showToast({
               title: '提交成功',
               icon: 'success',
-              duration: 2000
+              duration: 1500
             });
             setTimeout(() => {
               Taro.navigateBack();
-            }, 2000);
-          }, 1000);
+            }, 1500);
+          }, 800);
         }
       }
     });
@@ -142,9 +151,44 @@ const SparePartsPage: React.FC = () => {
         </View>
       )}
 
+      {order && order.spareParts && order.spareParts.length > 0 && (
+        <View className={styles.section}>
+          <View className={styles.sectionHeader}>
+            <Text className={styles.title}>📦 已有备件</Text>
+          </View>
+          <View className={styles.sectionBody}>
+            <View className={styles.partsList}>
+              {order.spareParts.map(part => (
+                <View key={part.id} className={styles.partItem} style={{ paddingBottom: 0, borderBottom: '1rpx solid #f2f3f5' }}>
+                  <View className={styles.partInfo}>
+                    <View style={{ fontSize: '28rpx', fontWeight: 500, color: '#1d2129', marginBottom: '8rpx' }}>
+                      {part.name}
+                    </View>
+                    <View style={{ fontSize: '24rpx', color: '#86909c' }}>
+                      数量：{part.quantity} | 预计到货：{part.estimatedArrival}
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      fontSize: '24rpx',
+                      padding: '4rpx 16rpx',
+                      borderRadius: '4rpx',
+                      backgroundColor: part.status === 'approved' ? 'rgba(0, 180, 42, 0.1)' : 'rgba(255, 125, 0, 0.1)',
+                      color: part.status === 'approved' ? '#00b42a' : '#ff7d00'
+                    }}
+                  >
+                    {part.status === 'approved' ? '已批准' : part.status === 'pending' ? '待审批' : part.status === 'rejected' ? '已拒绝' : '已到货'}
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+      )}
+
       <View className={styles.section}>
         <View className={styles.sectionHeader}>
-          <Text className={styles.title}>📦 备件清单</Text>
+          <Text className={styles.title}>📦 新增备件清单</Text>
         </View>
         <View className={styles.sectionBody}>
           <View className={styles.partsList}>

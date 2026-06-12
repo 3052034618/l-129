@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image } from '@tarojs/components';
+import { View, Text, Image, Input, Textarea, ScrollView } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
-import { getOrderById } from '@/data/orders';
 import { WorkOrder } from '@/types';
 import { useApp } from '@/store/app-context';
 import { formatDuration } from '@/utils';
 
 const OrderDetailPage: React.FC = () => {
   const router = useRouter();
-  const { user } = useApp();
+  const { user, getOrderById, acceptOrder, completeRepair, refreshOrders } = useApp();
   const [order, setOrder] = useState<WorkOrder | null>(null);
+  const [showRepairModal, setShowRepairModal] = useState(false);
+  const [diagnosis, setDiagnosis] = useState('');
+  const [repairSteps, setRepairSteps] = useState('');
+  const [downtime, setDowntime] = useState(0);
+  const [needOutsource, setNeedOutsource] = useState(false);
+  const [outsourceCompany, setOutsourceCompany] = useState('');
 
   const orderId = router.params.id || '1';
 
@@ -21,10 +26,15 @@ const OrderDetailPage: React.FC = () => {
     loadOrder();
   });
 
+  useEffect(() => {
+    refreshOrders();
+    loadOrder();
+  }, [refreshOrders]);
+
   const loadOrder = () => {
     const foundOrder = getOrderById(orderId);
     if (foundOrder) {
-      setOrder(foundOrder);
+      setOrder({ ...foundOrder });
     }
   };
 
@@ -36,23 +46,56 @@ const OrderDetailPage: React.FC = () => {
       confirmColor: '#165dff',
       success: (res) => {
         if (res.confirm) {
+          acceptOrder({
+            orderId,
+            maintainer: user.name
+          });
           Taro.showToast({
             title: '接单成功',
             icon: 'success'
           });
+          setTimeout(() => {
+            refreshOrders();
+            loadOrder();
+          }, 500);
         }
       }
     });
   };
 
-  const handleStartRepair = () => {
-    Taro.showToast({
-      title: '开始维修',
-      icon: 'success'
-    });
+  const handleOpenRepairModal = () => {
+    if (order) {
+      setDiagnosis(order.diagnosis || '');
+      setRepairSteps(order.repairSteps || '');
+      setDowntime(order.downtime || 0);
+      setNeedOutsource(order.needOutsource || false);
+      setOutsourceCompany(order.outsourceCompany || '');
+    }
+    setShowRepairModal(true);
+  };
+
+  const handleCloseRepairModal = () => {
+    setShowRepairModal(false);
+  };
+
+  const handleDowntimeChange = (delta: number) => {
+    setDowntime(prev => Math.max(0, prev + delta));
   };
 
   const handleComplete = () => {
+    if (!diagnosis.trim()) {
+      Taro.showToast({ title: '请填写排查原因', icon: 'none' });
+      return;
+    }
+    if (!repairSteps.trim()) {
+      Taro.showToast({ title: '请填写维修步骤', icon: 'none' });
+      return;
+    }
+    if (needOutsource && !outsourceCompany.trim()) {
+      Taro.showToast({ title: '请填写外协公司', icon: 'none' });
+      return;
+    }
+
     Taro.showModal({
       title: '确认完成',
       content: '确定维修已完成？请确认设备已恢复正常。',
@@ -60,10 +103,23 @@ const OrderDetailPage: React.FC = () => {
       confirmColor: '#00b42a',
       success: (res) => {
         if (res.confirm) {
+          completeRepair({
+            orderId,
+            diagnosis: diagnosis.trim(),
+            repairSteps: repairSteps.trim(),
+            downtime,
+            needOutsource,
+            outsourceCompany: needOutsource ? outsourceCompany.trim() : undefined
+          });
+          setShowRepairModal(false);
           Taro.showToast({
             title: '已提交完成',
             icon: 'success'
           });
+          setTimeout(() => {
+            refreshOrders();
+            loadOrder();
+          }, 500);
         }
       }
     });
@@ -102,13 +158,6 @@ const OrderDetailPage: React.FC = () => {
   const isMaintainer = user.role === 'maintainer' || user.role === 'admin';
   const isEmployee = user.role === 'employee';
 
-  const showAcceptBtn = () => {
-    if (order.status === 'pending' && isMaintainer) {
-      return true;
-    }
-    return false;
-  };
-
   const renderBottomBar = () => {
     if (order.status === 'pending' && isMaintainer) {
       return (
@@ -126,7 +175,7 @@ const OrderDetailPage: React.FC = () => {
           <View className={classnames(styles.btn, styles.outline)} onClick={handleSpareParts}>
             <Text className={styles.btnText}>备件申请</Text>
           </View>
-          <View className={classnames(styles.btn, styles.success)} onClick={handleComplete}>
+          <View className={classnames(styles.btn, styles.success)} onClick={handleOpenRepairModal}>
             <Text className={styles.btnText}>完成维修</Text>
           </View>
         </View>
@@ -317,29 +366,29 @@ const OrderDetailPage: React.FC = () => {
           <View className={styles.progressTimeline}>
             {order.records && order.records.length > 0 ? (
               order.records.map((record, index) => (
-              <View
-                key={record.id}
-                className={classnames(
-                styles.timelineItem,
-                index === order.records.length - 1 && styles.done
-              )}
-            >
-              <View className={styles.dot}></View>
-              <View className={styles.line}></View>
-              <View className={styles.content}>
-                <Text className={styles.action}>{record.action}</Text>
-                <Text className={styles.description}>{record.description}</Text>
-                <Text className={styles.meta}>
-                  {record.operator} · {record.timestamp}
-                </Text>
+                <View
+                  key={record.id}
+                  className={classnames(
+                    styles.timelineItem,
+                    index === order.records.length - 1 && styles.done
+                  )}
+                >
+                  <View className={styles.dot}></View>
+                  <View className={styles.line}></View>
+                  <View className={styles.content}>
+                    <Text className={styles.action}>{record.action}</Text>
+                    <Text className={styles.description}>{record.description}</Text>
+                    <Text className={styles.meta}>
+                      {record.operator} · {record.timestamp}
+                    </Text>
+                  </View>
+                </View>
+              ))
+            ) : (
+              <View style={{ textAlign: 'center', padding: '40rpx 0' }}>
+                <Text style={{ color: '#86909c', fontSize: 28 }}>暂无处理记录</Text>
               </View>
-            </View>
-          ))
-        ) : (
-          <View style={{ textAlign: 'center', padding: '40rpx 0' }}>
-            <Text style={{ color: '#86909c', fontSize: 28 }}>暂无处理记录</Text>
-          </View>
-        )}
+            )}
           </View>
         </View>
       </View>
@@ -371,6 +420,119 @@ const OrderDetailPage: React.FC = () => {
       )}
 
       {renderBottomBar()}
+
+      {showRepairModal && (
+        <View className={styles.modalMask}>
+          <View className={styles.modalContent}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>填写维修结果</Text>
+              <View className={styles.closeBtn} onClick={handleCloseRepairModal}>
+                <Text>×</Text>
+              </View>
+            </View>
+            <ScrollView scrollY className={styles.modalBody}>
+              <View className={styles.formItem}>
+                <Text className={styles.label}>
+                  <Text className={styles.required}>*</Text>排查原因
+                </Text>
+                <View className={styles.textareaWrap}>
+                  <Textarea
+                    className={styles.textarea}
+                    placeholder="请填写故障排查结果和原因分析"
+                    placeholderStyle="color: #c9cdd4"
+                    value={diagnosis}
+                    onInput={(e) => setDiagnosis(e.detail.value)}
+                    maxlength={500}
+                  />
+                </View>
+                <Text className={styles.wordCount}>{diagnosis.length}/500</Text>
+              </View>
+
+              <View className={styles.formItem}>
+                <Text className={styles.label}>
+                  <Text className={styles.required}>*</Text>维修步骤
+                </Text>
+                <View className={styles.textareaWrap}>
+                  <Textarea
+                    className={styles.textarea}
+                    placeholder="请详细描述维修操作步骤"
+                    placeholderStyle="color: #c9cdd4"
+                    value={repairSteps}
+                    onInput={(e) => setRepairSteps(e.detail.value)}
+                    maxlength={1000}
+                  />
+                </View>
+                <Text className={styles.wordCount}>{repairSteps.length}/1000</Text>
+              </View>
+
+              <View className={styles.formItem}>
+                <Text className={styles.label}>停机时长（分钟）</Text>
+                <View className={styles.inputWrap}>
+                  <View className={styles.quantityControl}>
+                    <View
+                      className={classnames(styles.qtyBtn, downtime <= 0 && styles.disabled)}
+                      onClick={() => handleDowntimeChange(-10)}
+                    >
+                      <Text>-10</Text>
+                    </View>
+                    <View
+                      className={classnames(styles.qtyBtn, downtime <= 0 && styles.disabled)}
+                      onClick={() => handleDowntimeChange(-1)}
+                    >
+                      <Text>-</Text>
+                    </View>
+                    <Text className={styles.qtyValue}>{downtime}</Text>
+                    <View className={styles.qtyBtn} onClick={() => handleDowntimeChange(1)}>
+                      <Text>+</Text>
+                    </View>
+                    <View className={styles.qtyBtn} onClick={() => handleDowntimeChange(10)}>
+                      <Text>+10</Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
+
+              <View className={styles.formItem}>
+                <Text className={styles.label}>是否需要外协</Text>
+                <View className={styles.switchRow}>
+                  <Text className={styles.switchLabel}>
+                    {needOutsource ? '是' : '否'}
+                  </Text>
+                  <View
+                    className={classnames(styles.switchBtn, needOutsource && styles.on)}
+                    onClick={() => setNeedOutsource(!needOutsource)}
+                  />
+                </View>
+              </View>
+
+              {needOutsource && (
+                <View className={styles.formItem}>
+                  <Text className={styles.label}>
+                    <Text className={styles.required}>*</Text>外协公司名称
+                  </Text>
+                  <View className={styles.inputWrap}>
+                    <Input
+                      className={styles.input}
+                      placeholder="请输入外协公司名称"
+                      placeholderClass="placeholder"
+                      value={outsourceCompany}
+                      onInput={(e) => setOutsourceCompany(e.detail.value)}
+                    />
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+            <View className={styles.modalFooter}>
+              <View className={classnames(styles.btn, styles.outline)} onClick={handleCloseRepairModal}>
+                <Text className={styles.btnText}>取消</Text>
+              </View>
+              <View className={classnames(styles.btn, styles.success)} onClick={handleComplete}>
+                <Text className={styles.btnText}>确认完成</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
