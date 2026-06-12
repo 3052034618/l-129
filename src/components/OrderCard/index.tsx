@@ -5,6 +5,7 @@ import styles from './index.module.scss';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import { WorkOrder } from '@/types';
+import { isOrderTimeout } from '@/utils';
 
 interface OrderCardProps {
   order: WorkOrder;
@@ -31,11 +32,18 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onClick, showAccept = fals
     }
   };
 
+  const timeout = isOrderTimeout(order);
+
   return (
     <View className={styles.card} onClick={handleClick}>
       <View className={styles.cardHeader}>
         <View className={styles.leftInfo}>
           <Text className={styles.orderNo}>{order.orderNo}</Text>
+          {timeout && (
+            <View className={styles.timeoutTag}>
+              <Text className={styles.timeoutText}>已超时</Text>
+            </View>
+          )}
         </View>
         <View className={styles.rightInfo}>
           <StatusTag status={order.status} size="sm" />
@@ -57,6 +65,15 @@ const OrderCard: React.FC<OrderCardProps> = ({ order, onClick, showAccept = fals
           </View>
           <Text className={styles.faultDesc}>{order.faultDescription}</Text>
         </View>
+
+        {order.status !== 'pending' && order.maintainer && (
+          <View className={styles.maintainerInfo}>
+            <Text className={styles.maintainerText}>🛠️ {order.maintainer}</Text>
+            {order.acceptTime && (
+              <Text className={styles.acceptTimeText}>接单：{order.acceptTime.slice(5, 16)}</Text>
+            )}
+          </View>
+        )}
 
         {order.photos && order.photos.length > 0 && (
           <View className={styles.photoList}>

@@ -7,16 +7,19 @@ import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
 import { useApp } from '@/store/app-context';
 import { formatDuration } from '@/utils';
+import { mockMaintainers } from '@/data/users';
 
 const OrderDetailPage: React.FC = () => {
   const router = useRouter();
-  const { user, orders, acceptOrder, completeRepair, refreshOrders } = useApp();
+  const { user, orders, acceptOrder, completeRepair, transferOrder, refreshOrders } = useApp();
   const [showRepairModal, setShowRepairModal] = useState(false);
+  const [showTransferModal, setShowTransferModal] = useState(false);
   const [diagnosis, setDiagnosis] = useState('');
   const [repairSteps, setRepairSteps] = useState('');
   const [downtime, setDowntime] = useState(0);
   const [needOutsource, setNeedOutsource] = useState(false);
   const [outsourceCompany, setOutsourceCompany] = useState('');
+  const [selectedMaintainer, setSelectedMaintainer] = useState('');
 
   const orderId = router.params.id || '1';
 
@@ -113,6 +116,45 @@ const OrderDetailPage: React.FC = () => {
     });
   };
 
+  const handleOpenTransferModal = () => {
+    setSelectedMaintainer('');
+    setShowTransferModal(true);
+  };
+
+  const handleCloseTransferModal = () => {
+    setShowTransferModal(false);
+    setSelectedMaintainer('');
+  };
+
+  const handleSelectMaintainer = (name: string) => {
+    setSelectedMaintainer(name);
+  };
+
+  const handleConfirmTransfer = () => {
+    if (!selectedMaintainer) {
+      Taro.showToast({ title: '请选择接收人', icon: 'none' });
+      return;
+    }
+    if (!order) return;
+    Taro.showModal({
+      title: '确认转派',
+      content: `确定要将此工单转派给 ${selectedMaintainer} 吗？`,
+      confirmColor: '#ff7d00',
+      success: (res) => {
+        if (res.confirm) {
+          transferOrder({
+            orderId,
+            fromMaintainer: order.maintainer || user.name,
+            toMaintainer: selectedMaintainer
+          });
+          Taro.showToast({ title: '转派成功', icon: 'success' });
+          setShowTransferModal(false);
+          setSelectedMaintainer('');
+        }
+      }
+    });
+  };
+
   const handleEvaluate = () => {
     Taro.navigateTo({
       url: `/pages/evaluation/index?orderId=${orderId}`
@@ -154,10 +196,13 @@ const OrderDetailPage: React.FC = () => {
     if (order.status === 'processing' && isMaintainer) {
       return (
         <View className={styles.bottomBar}>
-          <View className={classnames(styles.btn, styles.outline)} onClick={handleSpareParts}>
+          <View className={classnames(styles.btn, styles.outline, styles.small)} onClick={handleSpareParts}>
             <Text className={styles.btnText}>备件申请</Text>
           </View>
-          <View className={classnames(styles.btn, styles.success)} onClick={handleOpenRepairModal}>
+          <View className={classnames(styles.btn, styles.warning, styles.small)} onClick={handleOpenTransferModal}>
+            <Text className={styles.btnText}>转派</Text>
+          </View>
+          <View className={classnames(styles.btn, styles.success, styles.small)} onClick={handleOpenRepairModal}>
             <Text className={styles.btnText}>完成维修</Text>
           </View>
         </View>
@@ -510,6 +555,55 @@ const OrderDetailPage: React.FC = () => {
               </View>
               <View className={classnames(styles.btn, styles.success)} onClick={handleComplete}>
                 <Text className={styles.btnText}>确认完成</Text>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {showTransferModal && (
+        <View className={styles.modalMask}>
+          <View className={styles.modalContent}>
+            <View className={styles.modalHeader}>
+              <Text className={styles.modalTitle}>选择接收维修人员</Text>
+              <View className={styles.closeBtn} onClick={handleCloseTransferModal}>
+                <Text>×</Text>
+              </View>
+            </View>
+            <ScrollView scrollY className={styles.modalBody}>
+              {mockMaintainers.map(m => (
+                <View
+                  key={m.id}
+                  className={classnames(
+                    styles.maintainerItem,
+                    selectedMaintainer === m.name && styles.selected,
+                    order?.maintainer === m.name && styles.disabled
+                  )}
+                  onClick={() => {
+                    if (order?.maintainer !== m.name) {
+                      handleSelectMaintainer(m.name);
+                    }
+                  }}
+                >
+                  <View className={styles.maintainerInfo}>
+                    <Text className={styles.maintainerName}>{m.name}</Text>
+                    <Text className={styles.maintainerDept}>{m.department}</Text>
+                  </View>
+                  {order?.maintainer === m.name && (
+                    <Text className={styles.currentTag}>当前</Text>
+                  )}
+                  {selectedMaintainer === m.name && order?.maintainer !== m.name && (
+                    <Text className={styles.checkIcon}>✓</Text>
+                  )}
+                </View>
+              ))}
+            </ScrollView>
+            <View className={styles.modalFooter}>
+              <View className={classnames(styles.btn, styles.outline)} onClick={handleCloseTransferModal}>
+                <Text className={styles.btnText}>取消</Text>
+              </View>
+              <View className={classnames(styles.btn, styles.warning)} onClick={handleConfirmTransfer}>
+                <Text className={styles.btnText}>确认转派</Text>
               </View>
             </View>
           </View>

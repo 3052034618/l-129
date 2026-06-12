@@ -56,6 +56,49 @@
   }
 }
 
+.mineFilter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 $page-padding $spacing-md;
+
+  .mineLabel {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  .mineSwitch {
+    width: 80rpx;
+    height: 44rpx;
+    border-radius: 44rpx;
+    background-color: $color-bg-hover;
+    position: relative;
+    transition: all $transition-base;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 4rpx;
+      top: 4rpx;
+      width: 36rpx;
+      height: 36rpx;
+      border-radius: 50%;
+      background-color: #fff;
+      box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
+      transition: all $transition-base;
+    }
+
+    &.on {
+      background-color: $color-primary;
+
+      &::before {
+        transform: translateX(36rpx);
+      }
+    }
+  }
+}
+
 .tabs {
   display: flex;
   background-color: $color-bg-card;

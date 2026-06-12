@@ -3,7 +3,7 @@ import Taro from '@tarojs/taro';
 import { UserInfo, UserRole, WorkOrder, SparePart, RepairRecord } from '@/types';
 import { mockCurrentUser } from '@/data/users';
 import { mockOrders } from '@/data/orders';
-import { generateOrderNo, formatDateTime } from '@/utils';
+import { generateOrderNo, formatDateTime, formatDuration } from '@/utils';
 
 const ORDERS_STORAGE_KEY = 'repair_orders_data';
 const USER_STORAGE_KEY = 'repair_user_data';
@@ -34,6 +34,12 @@ interface SubmitEvaluationParams {
   content: string;
 }
 
+interface TransferOrderParams {
+  orderId: string;
+  fromMaintainer: string;
+  toMaintainer: string;
+}
+
 interface AppContextType {
   user: UserInfo;
   setUser: (user: UserInfo) => void;
@@ -45,6 +51,7 @@ interface AppContextType {
   completeRepair: (params: CompleteRepairParams) => void;
   addSpareParts: (params: AddSparePartsParams) => void;
   submitEvaluation: (params: SubmitEvaluationParams) => void;
+  transferOrder: (params: TransferOrderParams) => void;
   refreshOrders: () => void;
 }
 
@@ -177,13 +184,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const now = formatDateTime(new Date());
     setOrders(prev => prev.map(order => {
       if (order.id !== orderId) return order;
+      const outsourceText = needOutsource
+        ? `是（${outsourceCompany || ''}）`
+        : '否';
+      const description = `排查原因：${diagnosis}\n维修步骤：${repairSteps}\n停机时长：${formatDuration(downtime)}\n是否外协：${outsourceText}`;
       const newRecord: RepairRecord = {
         id: `r_${orderId}_${Date.now()}`,
         orderId,
         operator: order.maintainer || '维修人员',
         operatorRole: 'maintainer',
         action: '完成维修',
-        description: `排查原因：${diagnosis}；维修步骤：${repairSteps}`,
+        description,
         timestamp: now
       };
       return {
@@ -195,6 +206,27 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         downtime,
         needOutsource,
         outsourceCompany: needOutsource ? outsourceCompany : undefined,
+        records: [...order.records, newRecord]
+      };
+    }));
+  }, []);
+
+  const transferOrder = useCallback(({ orderId, fromMaintainer, toMaintainer }: TransferOrderParams) => {
+    const now = formatDateTime(new Date());
+    setOrders(prev => prev.map(order => {
+      if (order.id !== orderId) return order;
+      const newRecord: RepairRecord = {
+        id: `r_${orderId}_${Date.now()}`,
+        orderId,
+        operator: fromMaintainer,
+        operatorRole: 'maintainer',
+        action: '转派工单',
+        description: `${fromMaintainer} 将工单转派给 ${toMaintainer}`,
+        timestamp: now
+      };
+      return {
+        ...order,
+        maintainer: toMaintainer,
         records: [...order.records, newRecord]
       };
     }));
@@ -272,6 +304,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         completeRepair,
         addSpareParts,
         submitEvaluation,
+        transferOrder,
         refreshOrders
       }}
     >

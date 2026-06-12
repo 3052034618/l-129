@@ -15,6 +15,9 @@ const BoardPage: React.FC = () => {
   const [locationFilter, setLocationFilter] = useState('全部位置');
   const [typeFilter, setTypeFilter] = useState('全部类型');
   const [priorityFilter, setPriorityFilter] = useState('全部优先级');
+  const [onlyMine, setOnlyMine] = useState(false);
+
+  const isMaintainerRole = user.role === 'maintainer' || user.role === 'admin';
 
   useDidShow(() => {
     refreshOrders();
@@ -27,6 +30,10 @@ const BoardPage: React.FC = () => {
       if (activeTab === 'completed') return order.status === 'completed' || order.status === 'closed';
       return true;
     });
+
+    if (onlyMine && isMaintainerRole) {
+      result = result.filter(o => o.maintainer === user.name);
+    }
 
     if (locationFilter !== '全部位置') {
       result = result.filter(order => order.location.includes(locationFilter));
@@ -44,7 +51,7 @@ const BoardPage: React.FC = () => {
       const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
-  }, [allOrders, activeTab, locationFilter, typeFilter, priorityFilter]);
+  }, [allOrders, activeTab, onlyMine, user.name, isMaintainerRole, locationFilter, typeFilter, priorityFilter]);
 
   const stats = useMemo(() => {
     return {
@@ -140,6 +147,16 @@ const BoardPage: React.FC = () => {
           </View>
         </View>
       </View>
+
+      {isMaintainerRole && (
+        <View className={styles.mineFilter}>
+          <Text className={styles.mineLabel}>只看我的工单</Text>
+          <View
+            className={classnames(styles.mineSwitch, onlyMine && styles.on)}
+            onClick={() => setOnlyMine(!onlyMine)}
+          />
+        </View>
+      )}
 
       <View className={styles.tabs}>
         {tabs.map(tab => (

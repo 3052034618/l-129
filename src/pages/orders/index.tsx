@@ -11,6 +11,9 @@ const OrdersPage: React.FC = () => {
   const { user, orders: allOrders, refreshOrders } = useApp();
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState('all');
+  const [onlyMine, setOnlyMine] = useState(false);
+
+  const isMaintainerRole = user.role === 'maintainer' || user.role === 'admin';
 
   useDidShow(() => {
     refreshOrders();
@@ -21,6 +24,14 @@ const OrdersPage: React.FC = () => {
 
     if (activeTab !== 'all') {
       result = result.filter(order => order.status === activeTab);
+    }
+
+    if (onlyMine) {
+      if (user.role === 'employee') {
+        result = result.filter(o => o.applicant === user.name);
+      } else if (isMaintainerRole) {
+        result = result.filter(o => o.maintainer === user.name);
+      }
     }
 
     if (searchText.trim()) {
@@ -37,7 +48,7 @@ const OrdersPage: React.FC = () => {
     return result.sort((a, b) => {
       return new Date(b.applyTime).getTime() - new Date(a.applyTime).getTime();
     });
-  }, [allOrders, activeTab, searchText]);
+  }, [allOrders, activeTab, searchText, onlyMine, user.name, user.role, isMaintainerRole]);
 
   const tabs = [
     { key: 'all', label: '全部' },
@@ -63,6 +74,16 @@ const OrdersPage: React.FC = () => {
             value={searchText}
             onInput={handleSearch}
             confirmType="search"
+          />
+        </View>
+      </View>
+
+      <View className={styles.filterRow}>
+        <View className={styles.mineFilter}>
+          <Text className={styles.mineLabel}>只看我的工单</Text>
+          <View
+            className={classnames(styles.mineSwitch, onlyMine && styles.on)}
+            onClick={() => setOnlyMine(!onlyMine)}
           />
         </View>
       </View>

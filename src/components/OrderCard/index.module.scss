@@ -25,12 +25,25 @@
   .leftInfo {
     display: flex;
     align-items: center;
+    gap: $spacing-sm;
   }
 
   .orderNo {
     font-size: $font-size-md;
     font-weight: $font-weight-semibold;
     color: $color-text-primary;
+  }
+
+  .timeoutTag {
+    background: rgba(245, 63, 63, 0.1);
+    padding: 4rpx 12rpx;
+    border-radius: $radius-xs;
+
+    .timeoutText {
+      font-size: $font-size-xs;
+      color: #f53f3f;
+      font-weight: $font-weight-medium;
+    }
   }
 }
 
@@ -112,6 +125,27 @@
       font-size: $font-size-md;
       color: $color-text-tertiary;
     }
+  }
+}
+
+.maintainerInfo {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  margin-top: $spacing-sm;
+  padding: $spacing-sm $spacing-md;
+  background: rgba(22, 93, 255, 0.05);
+  border-radius: $radius-xs;
+
+  .maintainerText {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    font-weight: $font-weight-medium;
+  }
+
+  .acceptTimeText {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
   }
 }
 

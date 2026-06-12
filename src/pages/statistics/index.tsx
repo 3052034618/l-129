@@ -3,14 +3,19 @@ import { View, Text, ScrollView } from '@tarojs/components';
 import Taro, { useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
-import { PriorityLevel } from '@/types';
+import { PriorityLevel, WorkOrder } from '@/types';
 import { useApp } from '@/store/app-context';
+import { mockMaintainers } from '@/data/users';
+import { isOrderTimeout, formatDuration } from '@/utils';
 
-type TabType = 'overview' | 'fault' | 'efficiency';
+type TabType = 'overview' | 'fault' | 'efficiency' | 'maintainer';
 
 const StatisticsPage: React.FC = () => {
   const { user, orders, refreshOrders } = useApp();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [detailMaintainer, setDetailMaintainer] = useState('');
+  const [detailType, setDetailType] = useState<'processing' | 'completed' | 'timeout'>('processing');
 
   useDidShow(() => {
     refreshOrders();
@@ -167,11 +172,66 @@ const StatisticsPage: React.FC = () => {
       .sort((a, b) => b.count - a.count);
   }, [orders]);
 
+  const maintainerStats = useMemo(() => {
+    const maintainerNames = [...new Set([
+      ...mockMaintainers.map(m => m.name),
+      ...orders.filter(o => o.maintainer).map(o => o.maintainer as string)
+    ])];
+
+    return maintainerNames.map(name => {
+      const personOrders = orders.filter(o => o.maintainer === name);
+      const processing = personOrders.filter(o => o.status === 'processing').length;
+      const completed = personOrders.filter(o => o.status === 'completed' || o.status === 'closed').length;
+      const timeoutCount = personOrders.filter(o => isOrderTimeout(o)).length;
+
+      const completedWithDowntime = personOrders.filter(o => o.status !== 'pending' && o.downtime !== undefined && o.downtime > 0);
+      const avgDowntime = completedWithDowntime.length > 0
+        ? Math.round(completedWithDowntime.reduce((sum, o) => sum + (o.downtime || 0), 0) / completedWithDowntime.length)
+        : 0;
+
+      return {
+        name,
+        processing,
+        completed,
+        timeout: timeoutCount,
+        avgDowntime,
+        total: personOrders.length
+      };
+    }).sort((a, b) => b.completed - a.completed);
+  }, [orders]);
+
   const tabs: { key: TabType; label: string }[] = [
     { key: 'overview', label: '概览' },
     { key: 'fault', label: '故障分析' },
-    { key: 'efficiency', label: '效率分析' }
+    { key: 'efficiency', label: '效率分析' },
+    { key: 'maintainer', label: '维修人员' }
   ];
+
+  const handleViewMaintainerDetail = (maintainer: string, type: 'processing' | 'completed' | 'timeout') => {
+    setDetailMaintainer(maintainer);
+    setDetailType(type);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetail = () => {
+    setShowDetailModal(false);
+    setDetailMaintainer('');
+  };
+
+  const detailOrders = useMemo(() => {
+    if (!detailMaintainer) return [] as WorkOrder[];
+    const personOrders = orders.filter(o => o.maintainer === detailMaintainer);
+    if (detailType === 'processing') return personOrders.filter(o => o.status === 'processing');
+    if (detailType === 'completed') return personOrders.filter(o => o.status === 'completed' || o.status === 'closed');
+    if (detailType === 'timeout') return personOrders.filter(o => isOrderTimeout(o));
+    return [];
+  }, [orders, detailMaintainer, detailType]);
+
+  const handleOrderClick = (orderId: string) => {
+    Taro.navigateTo({
+      url: `/pages/order-detail/index?id=${orderId}`
+    });
+  };
 
   const unresponsiveOrders = useMemo(() => {
     return orders
@@ -516,7 +576,102 @@ const StatisticsPage: React.FC = () => {
           </View>
         </>
       )}
+
+      {activeTab === 'maintainer' && (
+        <View className={styles.section}>
+          <View className={styles.sectionHeader}>
+            <Text className={styles.sectionTitle}>维修人员工作统计</Text>
+          </View>
+          <View className={styles.statCard}>
+            {maintainerStats.map((m, idx) => (
+              <View key={m.name} className={classnames(styles.maintainerRow, idx < maintainerStats.length - 1 && styles.rowBorder)}>
+                <View className={styles.maintainerInfo}>
+                  <View className={styles.maintainerAvatar}>
+                    <Text>{m.name.slice(0, 1)}</Text>
+                  </View>
+                  <View>
+                    <Text className={styles.maintainerName}>{m.name}</Text>
+                    <Text className={styles.maintainerMeta}>共 {m.total} 单 · 平均停机 {m.avgDowntime || 0}分钟</Text>
+                  </View>
+                </View>
+                <View className={styles.maintainerCounters}>
+                  <View
+                    className={classnames(styles.counterItem, styles.counterProcessing)}
+                    onClick={() => m.processing > 0 && handleViewMaintainerDetail(m.name, 'processing')}
+                  >
+                    <Text className={styles.counterValue}>{m.processing}</Text>
+                    <Text className={styles.counterLabel}>处理中</Text>
+                  </View>
+                  <View
+                    className={classnames(styles.counterItem, styles.counterCompleted)}
+                    onClick={() => m.completed > 0 && handleViewMaintainerDetail(m.name, 'completed')}
+                  >
+                    <Text className={styles.counterValue}>{m.completed}</Text>
+                    <Text className={styles.counterLabel}>已完成</Text>
+                  </View>
+                  <View
+                    className={classnames(styles.counterItem, styles.counterTimeout)}
+                    onClick={() => m.timeout > 0 && handleViewMaintainerDetail(m.name, 'timeout')}
+                  >
+                    <Text className={styles.counterValue}>{m.timeout}</Text>
+                    <Text className={styles.counterLabel}>超时</Text>
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        </View>
+      )}
     </ScrollView>
+
+    {showDetailModal && (
+      <View className={styles.modalMask}>
+        <View className={styles.modalContent}>
+          <View className={styles.modalHeader}>
+            <Text className={styles.modalTitle}>
+              {detailMaintainer} · {detailType === 'processing' ? '处理中' : detailType === 'completed' ? '已完成' : '超时'}工单
+            </Text>
+            <View className={styles.closeBtn} onClick={handleCloseDetail}>
+              <Text>×</Text>
+            </View>
+          </View>
+          <ScrollView scrollY className={styles.modalBody}>
+            {detailOrders.length > 0 ? (
+              detailOrders.map(order => (
+                <View
+                  key={order.id}
+                  className={styles.detailOrderItem}
+                  onClick={() => {
+                    handleCloseDetail();
+                    handleOrderClick(order.id);
+                  }}
+                >
+                  <View>
+                    <Text className={styles.detailOrderName}>{order.assetName}</Text>
+                    <Text className={styles.detailOrderMeta}>
+                      {order.orderNo} · {order.location}
+                    </Text>
+                    <Text className={styles.detailOrderDesc}>{order.faultDescription}</Text>
+                  </View>
+                  <View className={styles.detailOrderRight}>
+                    <Text className={styles.detailOrderTime}>
+                      {detailType === 'completed' && order.downtime !== undefined ? `${formatDuration(order.downtime)}` : order.applyTime.slice(5, 16)}
+                    </Text>
+                    {isOrderTimeout(order) && (
+                      <Text className={styles.detailOrderTimeout}>超时</Text>
+                    )}
+                  </View>
+                </View>
+              ))
+            ) : (
+              <View style={{ textAlign: 'center', padding: '80rpx 0' }}>
+                <Text style={{ fontSize: '28rpx', color: '#86909c' }}>暂无工单</Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </View>
+    )}
   );
 };
 

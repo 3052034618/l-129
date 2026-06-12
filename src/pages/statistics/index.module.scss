@@ -368,3 +368,192 @@
     }
   }
 }
+
+.maintainerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-md 0;
+
+  &.rowBorder {
+    border-bottom: 1rpx solid $color-divider;
+  }
+
+  .maintainerInfo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
+  .maintainerAvatar {
+    width: 80rpx;
+    height: 80rpx;
+    border-radius: 50%;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+  }
+
+  .maintainerName {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .maintainerMeta {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+
+  .maintainerCounters {
+    display: flex;
+    gap: $spacing-xs;
+  }
+}
+
+.counterItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-xs;
+  min-width: 88rpx;
+
+  &.counterProcessing {
+    background-color: rgba(22, 93, 255, 0.08);
+    .counterValue { color: $color-primary; }
+  }
+  &.counterCompleted {
+    background-color: rgba(0, 180, 42, 0.08);
+    .counterValue { color: $color-success; }
+  }
+  &.counterTimeout {
+    background-color: rgba(245, 63, 63, 0.08);
+    .counterValue { color: $color-error; }
+  }
+
+  .counterValue {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    line-height: 1.2;
+  }
+
+  .counterLabel {
+    font-size: 20rpx;
+    color: $color-text-tertiary;
+    margin-top: 2rpx;
+  }
+}
+
+.modalMask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $page-padding;
+}
+
+.modalContent {
+  width: 100%;
+  max-height: 80vh;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+
+  .modalTitle {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .closeBtn {
+    width: 48rpx;
+    height: 48rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-xl;
+    color: $color-text-tertiary;
+  }
+}
+
+.modalBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: $spacing-lg;
+}
+
+.detailOrderItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: $spacing-md;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+  margin-bottom: $spacing-sm;
+
+  .detailOrderName {
+    display: block;
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .detailOrderMeta {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+    margin-bottom: 4rpx;
+  }
+
+  .detailOrderDesc {
+    display: block;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    line-height: 1.4;
+    max-width: 420rpx;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .detailOrderRight {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4rpx;
+  }
+
+  .detailOrderTime {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+
+  .detailOrderTimeout {
+    font-size: 20rpx;
+    color: #f53f3f;
+    background: rgba(245, 63, 63, 0.1);
+    padding: 2rpx 10rpx;
+    border-radius: $radius-xs;
+  }
+}

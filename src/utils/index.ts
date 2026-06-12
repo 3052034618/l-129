@@ -52,3 +52,26 @@ export const formatDateTime = (date: Date): string => {
   const seconds = String(date.getSeconds()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
+
+export const isOrderTimeout = (order: { priority: string; status: string; acceptTime?: string; completedTime?: string }): boolean => {
+  const priorityMap: Record<string, number> = { urgent: 60, high: 120, medium: 240, low: 240 };
+  const expectedDuration = priorityMap[order.priority] || 240;
+
+  if (order.status === 'completed' || order.status === 'closed') {
+    if (!order.acceptTime || !order.completedTime) return false;
+    const accept = new Date(order.acceptTime).getTime();
+    const complete = new Date(order.completedTime).getTime();
+    const duration = (complete - accept) / (1000 * 60);
+    return duration > expectedDuration;
+  }
+
+  if (order.status === 'processing') {
+    if (!order.acceptTime) return false;
+    const accept = new Date(order.acceptTime).getTime();
+    const now = new Date().getTime();
+    const duration = (now - accept) / (1000 * 60);
+    return duration > expectedDuration;
+  }
+
+  return false;
+};
