@@ -34,25 +34,7 @@ const StatisticsPage: React.FC = () => {
       return (now - applyTime) > 2 * 60 * 60 * 1000;
     }).length;
 
-    const timeout = orders.filter(o => {
-      if (o.status === 'completed' || o.status === 'closed') {
-        if (!o.acceptTime || !o.completedTime) return false;
-        const acceptTime = new Date(o.acceptTime).getTime();
-        const completedTime = new Date(o.completedTime).getTime();
-        const duration = (completedTime - acceptTime) / (1000 * 60);
-        const expectedDuration = o.priority === 'urgent' ? 60 : o.priority === 'high' ? 120 : 240;
-        return duration > expectedDuration;
-      }
-      if (o.status === 'processing') {
-        if (!o.acceptTime) return false;
-        const acceptTime = new Date(o.acceptTime).getTime();
-        const now = new Date('2024-06-01 12:00:00').getTime();
-        const duration = (now - acceptTime) / (1000 * 60);
-        const expectedDuration = o.priority === 'urgent' ? 60 : o.priority === 'high' ? 120 : 240;
-        return duration > expectedDuration;
-      }
-      return false;
-    }).length;
+    const timeout = orders.filter(o => isOrderTimeout(o)).length;
 
     const assetCountMap: Record<string, { count: number; name: string; location: string }> = {};
     orders.forEach(order => {
@@ -184,9 +166,9 @@ const StatisticsPage: React.FC = () => {
       const completed = personOrders.filter(o => o.status === 'completed' || o.status === 'closed').length;
       const timeoutCount = personOrders.filter(o => isOrderTimeout(o)).length;
 
-      const completedWithDowntime = personOrders.filter(o => o.status !== 'pending' && o.downtime !== undefined && o.downtime > 0);
-      const avgDowntime = completedWithDowntime.length > 0
-        ? Math.round(completedWithDowntime.reduce((sum, o) => sum + (o.downtime || 0), 0) / completedWithDowntime.length)
+      const completedOrders = personOrders.filter(o => o.status === 'completed' || o.status === 'closed');
+      const avgDowntime = completedOrders.length > 0
+        ? Math.round(completedOrders.reduce((sum, o) => sum + (o.downtime || 0), 0) / completedOrders.length)
         : 0;
 
       return {
@@ -245,25 +227,7 @@ const StatisticsPage: React.FC = () => {
   }, [orders]);
 
   const timeoutOrders = useMemo(() => {
-    return orders.filter(o => {
-      if (o.status === 'completed' || o.status === 'closed') {
-        if (!o.acceptTime || !o.completedTime) return false;
-        const acceptTime = new Date(o.acceptTime).getTime();
-        const completedTime = new Date(o.completedTime).getTime();
-        const duration = (completedTime - acceptTime) / (1000 * 60);
-        const expectedDuration = o.priority === 'urgent' ? 60 : o.priority === 'high' ? 120 : 240;
-        return duration > expectedDuration;
-      }
-      if (o.status === 'processing') {
-        if (!o.acceptTime) return false;
-        const acceptTime = new Date(o.acceptTime).getTime();
-        const now = new Date('2024-06-01 12:00:00').getTime();
-        const duration = (now - acceptTime) / (1000 * 60);
-        const expectedDuration = o.priority === 'urgent' ? 60 : o.priority === 'high' ? 120 : 240;
-        return duration > expectedDuration;
-      }
-      return false;
-    });
+    return orders.filter(o => isOrderTimeout(o));
   }, [orders]);
 
   return (

@@ -329,7 +329,7 @@ const OrderDetailPage: React.FC = () => {
                   <Text className={styles.value}>{order.repairSteps}</Text>
                 </View>
               )}
-              {order.downtime !== undefined && order.downtime > 0 && (
+              {order.downtime !== undefined && (
                 <View className={styles.infoRow}>
                   <Text className={styles.label}>停机时长</Text>
                   <Text className={styles.value}>{formatDuration(order.downtime)}</Text>

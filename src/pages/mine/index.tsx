@@ -5,6 +5,7 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import { useApp } from '@/store/app-context';
 import { UserRole } from '@/types';
+import { isOrderTimeout } from '@/utils';
 
 const roleMap: Record<UserRole, { label: string; icon: string }> = {
   employee: { label: '员工', icon: '👤' },
@@ -58,25 +59,7 @@ const MinePage: React.FC = () => {
   const stats = {
     total: orders.length,
     unresponsive: orders.filter(o => o.status === 'pending').length,
-    timeout: orders.filter(o => {
-      if (o.status === 'completed' || o.status === 'closed') {
-        if (!o.acceptTime || !o.completedTime) return false;
-        const acceptTime = new Date(o.acceptTime).getTime();
-        const completedTime = new Date(o.completedTime).getTime();
-        const duration = (completedTime - acceptTime) / (1000 * 60);
-        const expectedDuration = o.priority === 'urgent' ? 60 : o.priority === 'high' ? 120 : 240;
-        return duration > expectedDuration;
-      }
-      if (o.status === 'processing') {
-        if (!o.acceptTime) return false;
-        const acceptTime = new Date(o.acceptTime).getTime();
-        const now = new Date().getTime();
-        const duration = (now - acceptTime) / (1000 * 60);
-        const expectedDuration = o.priority === 'urgent' ? 60 : o.priority === 'high' ? 120 : 240;
-        return duration > expectedDuration;
-      }
-      return false;
-    }).length,
+    timeout: orders.filter(o => isOrderTimeout(o)).length,
     repeated: (() => {
       const assetCountMap: Record<string, number> = {};
       orders.forEach(o => {
