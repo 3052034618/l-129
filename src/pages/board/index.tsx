@@ -5,7 +5,6 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import OrderCard from '@/components/OrderCard';
 import Empty from '@/components/Empty';
-import { WorkOrder } from '@/types';
 import { useApp } from '@/store/app-context';
 
 type TabType = 'pending' | 'processing' | 'completed';
@@ -16,19 +15,13 @@ const BoardPage: React.FC = () => {
   const [locationFilter, setLocationFilter] = useState('全部位置');
   const [typeFilter, setTypeFilter] = useState('全部类型');
   const [priorityFilter, setPriorityFilter] = useState('全部优先级');
-  const [orders, setOrders] = useState<WorkOrder[]>([]);
 
   useDidShow(() => {
-    loadOrders();
+    refreshOrders();
   });
 
-  const loadOrders = () => {
-    refreshOrders();
-    setOrders([...allOrders]);
-  };
-
   const filteredOrders = useMemo(() => {
-    let result = orders.filter(order => {
+    let result = allOrders.filter(order => {
       if (activeTab === 'pending') return order.status === 'pending';
       if (activeTab === 'processing') return order.status === 'processing';
       if (activeTab === 'completed') return order.status === 'completed' || order.status === 'closed';
@@ -51,18 +44,18 @@ const BoardPage: React.FC = () => {
       const priorityOrder = { urgent: 0, high: 1, medium: 2, low: 3 };
       return priorityOrder[a.priority] - priorityOrder[b.priority];
     });
-  }, [orders, activeTab, locationFilter, typeFilter, priorityFilter]);
+  }, [allOrders, activeTab, locationFilter, typeFilter, priorityFilter]);
 
   const stats = useMemo(() => {
     return {
-      pending: orders.filter(o => o.status === 'pending').length,
-      urgent: orders.filter(o => o.priority === 'urgent' && o.status === 'pending').length,
-      today: orders.filter(o => o.applyTime.includes('2024-06-01')).length,
-      mine: orders.filter(o => o.maintainer === user.name && o.status === 'processing').length
+      pending: allOrders.filter(o => o.status === 'pending').length,
+      urgent: allOrders.filter(o => o.priority === 'urgent' && o.status === 'pending').length,
+      today: allOrders.filter(o => o.applyTime.includes('2024-06-01')).length,
+      mine: allOrders.filter(o => o.maintainer === user.name && o.status === 'processing').length
     };
-  }, [orders, user.name]);
+  }, [allOrders, user.name]);
 
-  const handleAcceptOrder = (order: WorkOrder) => {
+  const handleAcceptOrder = (order) => {
     Taro.showModal({
       title: '确认接单',
       content: `确定要接取工单 ${order.orderNo} 吗？`,
@@ -79,7 +72,6 @@ const BoardPage: React.FC = () => {
             icon: 'success',
             duration: 2000
           });
-          loadOrders();
         }
       }
     });

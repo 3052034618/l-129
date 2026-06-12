@@ -5,25 +5,19 @@ import classnames from 'classnames';
 import styles from './index.module.scss';
 import OrderCard from '@/components/OrderCard';
 import Empty from '@/components/Empty';
-import { WorkOrder } from '@/types';
 import { useApp } from '@/store/app-context';
 
 const OrdersPage: React.FC = () => {
-  const { user, orders: allOrders } = useApp();
+  const { user, orders: allOrders, refreshOrders } = useApp();
   const [searchText, setSearchText] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [orders, setOrders] = useState<WorkOrder[]>([]);
 
   useDidShow(() => {
-    loadOrders();
+    refreshOrders();
   });
 
-  const loadOrders = () => {
-    setOrders([...allOrders]);
-  };
-
   const filteredOrders = useMemo(() => {
-    let result = orders;
+    let result = allOrders;
 
     if (activeTab !== 'all') {
       result = result.filter(order => order.status === activeTab);
@@ -43,7 +37,7 @@ const OrdersPage: React.FC = () => {
     return result.sort((a, b) => {
       return new Date(b.applyTime).getTime() - new Date(a.applyTime).getTime();
     });
-  }, [orders, activeTab, searchText]);
+  }, [allOrders, activeTab, searchText]);
 
   const tabs = [
     { key: 'all', label: '全部' },

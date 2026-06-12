@@ -1,18 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { View, Text, Image, Input, Textarea, ScrollView } from '@tarojs/components';
 import Taro, { useRouter, useDidShow } from '@tarojs/taro';
 import classnames from 'classnames';
 import styles from './index.module.scss';
 import StatusTag from '@/components/StatusTag';
 import PriorityTag from '@/components/PriorityTag';
-import { WorkOrder } from '@/types';
 import { useApp } from '@/store/app-context';
 import { formatDuration } from '@/utils';
 
 const OrderDetailPage: React.FC = () => {
   const router = useRouter();
-  const { user, getOrderById, acceptOrder, completeRepair, refreshOrders } = useApp();
-  const [order, setOrder] = useState<WorkOrder | null>(null);
+  const { user, orders, acceptOrder, completeRepair, refreshOrders } = useApp();
   const [showRepairModal, setShowRepairModal] = useState(false);
   const [diagnosis, setDiagnosis] = useState('');
   const [repairSteps, setRepairSteps] = useState('');
@@ -23,20 +21,12 @@ const OrderDetailPage: React.FC = () => {
   const orderId = router.params.id || '1';
 
   useDidShow(() => {
-    loadOrder();
+    refreshOrders();
   });
 
-  useEffect(() => {
-    refreshOrders();
-    loadOrder();
-  }, [refreshOrders]);
-
-  const loadOrder = () => {
-    const foundOrder = getOrderById(orderId);
-    if (foundOrder) {
-      setOrder({ ...foundOrder });
-    }
-  };
+  const order = useMemo(() => {
+    return orders.find(o => o.id === orderId) || null;
+  }, [orders, orderId]);
 
   const handleAccept = () => {
     Taro.showModal({
@@ -54,10 +44,6 @@ const OrderDetailPage: React.FC = () => {
             title: '接单成功',
             icon: 'success'
           });
-          setTimeout(() => {
-            refreshOrders();
-            loadOrder();
-          }, 500);
         }
       }
     });
@@ -116,10 +102,6 @@ const OrderDetailPage: React.FC = () => {
             title: '已提交完成',
             icon: 'success'
           });
-          setTimeout(() => {
-            refreshOrders();
-            loadOrder();
-          }, 500);
         }
       }
     });

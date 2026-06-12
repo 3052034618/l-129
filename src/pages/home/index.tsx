@@ -1,34 +1,36 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View, Text, ScrollView } from '@tarojs/components';
 import Taro from '@tarojs/taro';
 import { useDidShow } from '@tarojs/taro';
 import styles from './index.module.scss';
 import OrderCard from '@/components/OrderCard';
 import { useApp } from '@/store/app-context';
-import { WorkOrder } from '@/types';
 
 const HomePage: React.FC = () => {
-  const { user, orders } = useApp();
-  const [recentOrders, setRecentOrders] = useState<WorkOrder[]>([]);
+  const { user, orders, refreshOrders } = useApp();
 
   useDidShow(() => {
-    loadData();
+    refreshOrders();
   });
 
-  const loadData = () => {
-    const myOrders = orders.filter(order => order.applicant === user.name);
-    setRecentOrders(myOrders.slice(0, 3));
-  };
+  const myOrders = useMemo(() => {
+    return orders.filter(order => order.applicant === user.name);
+  }, [orders, user.name]);
 
   const stats = useMemo(() => {
-    const myOrders = orders.filter(order => order.applicant === user.name);
     return {
       total: myOrders.length,
       pending: myOrders.filter(o => o.status === 'pending').length,
       processing: myOrders.filter(o => o.status === 'processing').length,
       completed: myOrders.filter(o => o.status === 'completed' || o.status === 'closed').length
     };
-  }, [user.name, orders]);
+  }, [myOrders]);
+
+  const recentOrders = useMemo(() => {
+    return [...myOrders]
+      .sort((a, b) => new Date(b.applyTime).getTime() - new Date(a.applyTime).getTime())
+      .slice(0, 3);
+  }, [myOrders]);
 
   const handleScanRepair = () => {
     Taro.navigateTo({
