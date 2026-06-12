@@ -1,0 +1,241 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 60rpx;
+}
+
+.userHeader {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 60rpx $page-padding 80rpx;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -80rpx;
+    right: -80rpx;
+    width: 240rpx;
+    height: 240rpx;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  .userInfo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-lg;
+    position: relative;
+    z-index: 1;
+  }
+
+  .avatar {
+    width: 120rpx;
+    height: 120rpx;
+    border-radius: $radius-round;
+    border: 4rpx solid rgba(255, 255, 255, 0.3);
+  }
+
+  .userDetail {
+    flex: 1;
+  }
+
+  .userName {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+    color: $color-text-white;
+    margin-bottom: 8rpx;
+  }
+
+  .userDept {
+    font-size: $font-size-sm;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 8rpx;
+  }
+
+  .userRole {
+    display: inline-block;
+    padding: 4rpx 16rpx;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: $radius-round;
+    font-size: $font-size-xs;
+    color: $color-text-white;
+  }
+}
+
+.roleSwitch {
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  margin: -40rpx $page-padding 0;
+  padding: $spacing-lg;
+  position: relative;
+  z-index: 2;
+  box-shadow: $shadow-card;
+
+  .roleTitle {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+
+  .roleOptions {
+    display: flex;
+    gap: $spacing-sm;
+  }
+
+  .roleOption {
+    flex: 1;
+    padding: $spacing-md $spacing-sm;
+    border: 2rpx solid $color-border;
+    border-radius: $radius-md;
+    text-align: center;
+    transition: all $transition-base;
+
+    .roleIcon {
+      font-size: 36rpx;
+      margin-bottom: 8rpx;
+    }
+
+    .roleText {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+    }
+
+    &.active {
+      border-color: $color-primary;
+      background-color: rgba(22, 93, 255, 0.05);
+
+      .roleText {
+        color: $color-primary;
+        font-weight: $font-weight-medium;
+      }
+    }
+  }
+}
+
+.section {
+  margin: $spacing-xl $page-padding 0;
+}
+
+.sectionTitle {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  color: $color-text-primary;
+  margin-bottom: $spacing-md;
+}
+
+.menuCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+  transition: all $transition-base;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:active {
+    background-color: $color-bg-hover;
+  }
+
+  .menuIcon {
+    width: 64rpx;
+    height: 64rpx;
+    background-color: rgba(22, 93, 255, 0.1);
+    border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: $spacing-md;
+
+    .iconText {
+      font-size: 32rpx;
+    }
+  }
+
+  .menuContent {
+    flex: 1;
+  }
+
+  .menuTitle {
+    font-size: $font-size-md;
+    color: $color-text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .menuDesc {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+
+  .menuArrow {
+    font-size: $font-size-md;
+    color: $color-text-tertiary;
+  }
+}
+
+.statsCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+
+  .statsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+
+    .statsTitle {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+    }
+
+    .viewMore {
+      font-size: $font-size-sm;
+      color: $color-primary;
+    }
+  }
+
+  .statsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-md;
+  }
+
+  .statItem {
+    text-align: center;
+
+    .statNumber {
+      font-size: $font-size-xl;
+      font-weight: $font-bold;
+      color: $color-primary;
+      margin-bottom: 4rpx;
+    }
+
+    &.warning .statNumber {
+      color: $color-warning;
+    }
+
+    &.error .statNumber {
+      color: $color-error;
+    }
+
+    .statLabel {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+  }
+}

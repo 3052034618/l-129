@@ -1,0 +1,158 @@
+@use '@/styles/variables.scss' as *;
+
+.card {
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.99);
+    box-shadow: $shadow-card-hover;
+  }
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1rpx solid $color-divider;
+
+  .leftInfo {
+    display: flex;
+    align-items: center;
+  }
+
+  .orderNo {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+}
+
+.cardBody {
+  margin-bottom: $spacing-md;
+}
+
+.assetInfo {
+  margin-bottom: $spacing-md;
+
+  .assetName {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    display: block;
+    margin-bottom: $spacing-xs;
+  }
+
+  .assetMeta {
+    display: flex;
+    align-items: center;
+
+    .metaText {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+    }
+  }
+}
+
+.faultInfo {
+  margin-bottom: $spacing-md;
+
+  .faultTypeRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-sm;
+  }
+
+  .faultType {
+    font-size: $font-size-sm;
+    color: $color-primary;
+    background-color: rgba(22, 93, 255, 0.1);
+    padding: 4rpx 12rpx;
+    border-radius: $radius-xs;
+  }
+
+  .faultDesc {
+    font-size: $font-size-md;
+    color: $color-text-secondary;
+    line-height: 1.6;
+    @include text-ellipsis-multi(2);
+  }
+}
+
+.photoList {
+  display: flex;
+  gap: $spacing-sm;
+  flex-wrap: nowrap;
+
+  .photo {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: $radius-sm;
+    flex-shrink: 0;
+  }
+
+  .morePhoto {
+    width: 160rpx;
+    height: 160rpx;
+    border-radius: $radius-sm;
+    background-color: $color-bg-hover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .moreText {
+      font-size: $font-size-md;
+      color: $color-text-tertiary;
+    }
+  }
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: $spacing-md;
+  border-top: 1rpx solid $color-divider;
+
+  .footerLeft {
+    display: flex;
+    flex-direction: column;
+    gap: 4rpx;
+  }
+
+  .applicant {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+
+  .time {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+
+  .acceptBtn {
+    padding: 12rpx 32rpx;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    border-radius: $radius-button;
+    transition: all $transition-base;
+
+    &:active {
+      opacity: 0.9;
+      transform: scale(0.95);
+    }
+
+    .acceptText {
+      font-size: $font-size-sm;
+      color: $color-text-white;
+      font-weight: $font-weight-medium;
+    }
+  }
+}

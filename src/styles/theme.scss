@@ -1,0 +1,43 @@
+// ============================================
+// 主题配色变量
+// ============================================
+
+// 品牌主题色：科技蓝 - 专业可信赖
+$color-primary: #165dff;
+$color-primary-light: #4080ff;
+$color-primary-dark: #0e42d2;
+
+// 功能色
+$color-success: #00b42a;
+$color-warning: #ff7d00;
+$color-error: #f53f3f;
+$color-info: #165dff;
+
+// 背景色
+$color-bg-page: #f5f6f7;
+$color-bg-card: #ffffff;
+$color-bg-hover: #f2f3f5;
+$color-bg-primary-light: #e8f0ff;
+
+// 文本色
+$color-text-primary: #1d2129;
+$color-text-secondary: #4e5969;
+$color-text-tertiary: #86909c;
+$color-text-disabled: #c9cdd4;
+$color-text-white: #ffffff;
+
+// 边框色
+$color-border: #e5e6eb;
+$color-divider: #f2f3f5;
+
+// 业务色 - 优先级
+$color-priority-urgent: #f53f3f;
+$color-priority-high: #ff7d00;
+$color-priority-medium: #165dff;
+$color-priority-low: #00b42a;
+
+// 业务色 - 工单状态
+$color-status-pending: #ff7d00;
+$color-status-processing: #165dff;
+$color-status-completed: #00b42a;
+$color-status-closed: #86909c;

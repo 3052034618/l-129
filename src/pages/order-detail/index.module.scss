@@ -1,0 +1,364 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 180rpx;
+}
+
+.section {
+  background-color: $color-bg-card;
+  margin: $spacing-md $page-padding;
+  border-radius: $radius-md;
+  overflow: hidden;
+  box-shadow: $shadow-card;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-lg;
+  border-bottom: 1rpx solid $color-divider;
+
+  .title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+  }
+}
+
+.sectionBody {
+  padding: $spacing-lg;
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  .orderNo {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .orderTime {
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+    margin-top: 8rpx;
+  }
+}
+
+.assetInfo {
+  .assetName {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-sm;
+  }
+
+  .infoRow {
+    display: flex;
+    margin-bottom: $spacing-sm;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      width: 120rpx;
+      flex-shrink: 0;
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+    }
+
+    .value {
+      flex: 1;
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+    }
+  }
+}
+
+.faultInfo {
+  .faultType {
+    display: inline-block;
+    padding: 4rpx 16rpx;
+    background-color: rgba(22, 93, 255, 0.1);
+    color: $color-primary;
+    font-size: $font-size-sm;
+    border-radius: $radius-xs;
+    margin-bottom: $spacing-md;
+  }
+
+  .faultDesc {
+    font-size: $font-size-md;
+    color: $color-text-secondary;
+    line-height: 1.6;
+  }
+}
+
+.photoList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-sm;
+
+  .photoItem {
+    width: 200rpx;
+    height: 200rpx;
+    border-radius: $radius-sm;
+    overflow: hidden;
+
+    .photo {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+.progressTimeline {
+  position: relative;
+  padding-left: 40rpx;
+}
+
+.timelineItem {
+  position: relative;
+  padding-bottom: $spacing-lg;
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  .dot {
+    position: absolute;
+    left: -40rpx;
+    top: 6rpx;
+    width: 20rpx;
+    height: 20rpx;
+    border-radius: 50%;
+    background-color: $color-primary;
+    border: 4rpx solid $color-bg-card;
+    box-shadow: 0 0 0 2rpx $color-primary;
+  }
+
+  &.done .dot {
+    background-color: $color-success;
+    box-shadow: 0 0 0 2rpx $color-success;
+  }
+
+  &.pending .dot {
+    background-color: $color-border;
+    box-shadow: none;
+  }
+
+  .line {
+    position: absolute;
+    left: -31rpx;
+    top: 30rpx;
+    bottom: 0;
+    width: 2rpx;
+    background-color: $color-divider;
+  }
+
+  &:last-child .line {
+    display: none;
+  }
+
+  .content {
+    .action {
+      font-size: $font-size-md;
+      font-weight: $font-weight-medium;
+      color: $color-text-primary;
+      margin-bottom: 8rpx;
+    }
+
+    .description {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      line-height: 1.5;
+      margin-bottom: 8rpx;
+    }
+
+    .meta {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+  }
+}
+
+.repairInfo {
+  .infoRow {
+    display: flex;
+    margin-bottom: $spacing-md;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .label {
+      width: 160rpx;
+      flex-shrink: 0;
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+    }
+
+    .value {
+      flex: 1;
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      line-height: 1.6;
+    }
+  }
+}
+
+.spareParts {
+  .partItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md 0;
+    border-bottom: 1rpx solid $color-divider;
+
+    &:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    &:first-child {
+      padding-top: 0;
+    }
+  }
+
+  .partInfo {
+    flex: 1;
+  }
+
+  .partName {
+    font-size: $font-size-md;
+    color: $color-text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .partMeta {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+
+  .partStatus {
+    font-size: $font-size-sm;
+    padding: 4rpx 16rpx;
+    border-radius: $radius-xs;
+  }
+}
+
+.evaluationCard {
+  background: linear-gradient(135deg, rgba(22, 93, 255, 0.05) 0%, rgba(64, 128, 255, 0.05) 100%);
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+
+  .scoreRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    .stars {
+      display: flex;
+      gap: 8rpx;
+
+      .star {
+        font-size: 36rpx;
+      }
+    }
+
+    .scoreText {
+      margin-left: $spacing-md;
+      font-size: $font-size-md;
+      color: $color-text-secondary;
+    }
+  }
+
+  .content {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    line-height: 1.6;
+    margin-bottom: $spacing-sm;
+  }
+
+  .time {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+}
+
+.bottomBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: $spacing-md $page-padding;
+  padding-bottom: calc($spacing-md + env(safe-area-inset-bottom));
+  background-color: $color-bg-card;
+  box-shadow: 0 -2rpx 12rpx rgba(0, 0, 0, 0.06);
+  display: flex;
+  gap: $spacing-md;
+}
+
+.btn {
+  flex: 1;
+  height: 88rpx;
+  border-radius: $radius-button;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all $transition-base;
+
+  &:active {
+    opacity: 0.9;
+    transform: scale(0.98);
+  }
+
+  .btnText {
+    font-size: $font-size-md;
+    font-weight: $font-weight-medium;
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    .btnText {
+      color: $color-text-white;
+    }
+  }
+
+  &.outline {
+    border: 2rpx solid $color-border;
+    background-color: $color-bg-card;
+    .btnText {
+      color: $color-text-secondary;
+    }
+  }
+
+  &.success {
+    background: linear-gradient(135deg, $color-success 0%, #23c34f 100%);
+    .btnText {
+      color: $color-text-white;
+    }
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, $color-warning 0%, #ff9a2e 100%);
+    .btnText {
+      color: $color-text-white;
+    }
+  }
+}
+
+.infoTag {
+  display: inline-block;
+  padding: 4rpx 16rpx;
+  border-radius: $radius-xs;
+  font-size: $font-size-sm;
+}

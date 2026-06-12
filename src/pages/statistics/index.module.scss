@@ -1,0 +1,370 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 40rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: $spacing-lg $page-padding $spacing-xl;
+  color: $color-text-white;
+
+  .title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-xs;
+  }
+
+  .subtitle {
+    font-size: $font-size-sm;
+    opacity: 0.85;
+  }
+}
+
+.summaryCards {
+  display: flex;
+  gap: $spacing-sm;
+  margin: -24rpx $page-padding $spacing-md;
+  position: relative;
+  z-index: 2;
+}
+
+.summaryCard {
+  flex: 1;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+  text-align: center;
+
+  .number {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    line-height: 1.2;
+    margin-bottom: 4rpx;
+  }
+
+  .label {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+
+  &.warning .number {
+    color: $color-warning;
+  }
+
+  &.error .number {
+    color: $color-error;
+  }
+
+  &.success .number {
+    color: $color-success;
+  }
+}
+
+.section {
+  margin: 0 $page-padding $spacing-md;
+
+  .sectionHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-md;
+
+    .sectionTitle {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $color-text-primary;
+    }
+
+    .more {
+      font-size: $font-size-sm;
+      color: $color-text-tertiary;
+    }
+  }
+}
+
+.statCard {
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.warnList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.warnItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+
+  .warnIcon {
+    width: 64rpx;
+    height: 64rpx;
+    border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-xl;
+    margin-right: $spacing-sm;
+    flex-shrink: 0;
+
+    &.error {
+      background-color: rgba($color-error, 0.1);
+    }
+
+    &.warning {
+      background-color: rgba($color-warning, 0.1);
+    }
+  }
+
+  .warnContent {
+    flex: 1;
+    min-width: 0;
+
+    .warnTitle {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $color-text-primary;
+      margin-bottom: 4rpx;
+    }
+
+    .warnDesc {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      @include text-ellipsis;
+    }
+  }
+
+  .warnCount {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-bold;
+    color: $color-error;
+    margin-left: $spacing-sm;
+  }
+}
+
+.chartSection {
+  margin-bottom: $spacing-md;
+
+  .chartTitle {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+}
+
+.barChart {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.barItem {
+  display: flex;
+  align-items: center;
+
+  .barLabel {
+    width: 140rpx;
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+    flex-shrink: 0;
+  }
+
+  .barTrack {
+    flex: 1;
+    height: 24rpx;
+    background-color: $color-bg-page;
+    border-radius: $radius-round;
+    overflow: hidden;
+    margin: 0 $spacing-sm;
+  }
+
+  .barFill {
+    height: 100%;
+    border-radius: $radius-round;
+    background: linear-gradient(90deg, $color-primary 0%, $color-primary-light 100%);
+    transition: width $transition-base;
+  }
+
+  .barValue {
+    width: 60rpx;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-medium;
+    color: $color-text-primary;
+    text-align: right;
+    flex-shrink: 0;
+  }
+}
+
+.pieLegend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+  margin-top: $spacing-md;
+}
+
+.legendItem {
+  display: flex;
+  align-items: center;
+
+  .legendDot {
+    width: 16rpx;
+    height: 16rpx;
+    border-radius: 50%;
+    margin-right: $spacing-xs;
+  }
+
+  .legendText {
+    font-size: $font-size-xs;
+    color: $color-text-secondary;
+  }
+}
+
+.repeatList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.repeatItem {
+  display: flex;
+  align-items: center;
+  padding: $spacing-sm 0;
+  border-bottom: 1rpx solid $color-divider;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .rank {
+    width: 48rpx;
+    height: 48rpx;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    color: $color-text-white;
+    margin-right: $spacing-sm;
+    flex-shrink: 0;
+
+    &.top1 {
+      background: linear-gradient(135deg, #ff7d00 0%, #ff9a2e 100%);
+    }
+
+    &.top2 {
+      background: linear-gradient(135deg, #165dff 0%, #4080ff 100%);
+    }
+
+    &.top3 {
+      background: linear-gradient(135deg, #00b42a 0%, #23c343 100%);
+    }
+
+    &.normal {
+      background-color: $color-text-tertiary;
+    }
+  }
+
+  .assetInfo {
+    flex: 1;
+    min-width: 0;
+
+    .assetName {
+      font-size: $font-size-sm;
+      font-weight: $font-weight-medium;
+      color: $color-text-primary;
+      margin-bottom: 4rpx;
+    }
+
+    .assetLocation {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+      @include text-ellipsis;
+    }
+  }
+
+  .countInfo {
+    text-align: right;
+    flex-shrink: 0;
+
+    .count {
+      font-size: $font-size-md;
+      font-weight: $font-weight-bold;
+      color: $color-error;
+    }
+
+    .unit {
+      font-size: $font-size-xs;
+      color: $color-text-tertiary;
+    }
+  }
+}
+
+.timeStats {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.timeStatItem {
+  flex: 1;
+  text-align: center;
+  padding: $spacing-md 0;
+  background-color: $color-bg-page;
+  border-radius: $radius-md;
+
+  .timeValue {
+    font-size: $font-size-xl;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .timeLabel {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+}
+
+.tabBar {
+  display: flex;
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  padding: 6rpx;
+  margin-bottom: $spacing-md;
+  box-shadow: $shadow-card;
+}
+
+.tabItem {
+  flex: 1;
+  padding: 16rpx 0;
+  text-align: center;
+  border-radius: $radius-sm;
+  transition: all $transition-base;
+
+  .tabText {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    font-weight: $font-weight-medium;
+  }
+
+  &.active {
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+
+    .tabText {
+      color: $color-text-white;
+      font-weight: $font-weight-semibold;
+    }
+  }
+}

@@ -1,0 +1,47 @@
+@use '@/styles/variables.scss' as *;
+
+.priorityTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx 20rpx;
+  border-radius: $radius-xs;
+
+  &.sm {
+    padding: 4rpx 12rpx;
+  }
+
+  .text {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    line-height: 1.2;
+  }
+
+  &.urgent {
+    background-color: rgba(245, 63, 63, 0.1);
+    .text {
+      color: $color-error;
+    }
+  }
+
+  &.high {
+    background-color: rgba(255, 125, 0, 0.1);
+    .text {
+      color: $color-warning;
+    }
+  }
+
+  &.medium {
+    background-color: rgba(22, 93, 255, 0.1);
+    .text {
+      color: $color-primary;
+    }
+  }
+
+  &.low {
+    background-color: rgba(0, 180, 42, 0.1);
+    .text {
+      color: $color-success;
+    }
+  }
+}

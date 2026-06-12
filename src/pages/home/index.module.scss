@@ -1,0 +1,217 @@
+@use '@/styles/variables.scss' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $color-bg-page;
+  padding-bottom: 40rpx;
+}
+
+.header {
+  background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+  padding: 40rpx $page-padding 60rpx;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -100rpx;
+    right: -100rpx;
+    width: 300rpx;
+    height: 300rpx;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+  }
+
+  .headerContent {
+    position: relative;
+    z-index: 1;
+  }
+
+  .greeting {
+    font-size: $font-size-lg;
+    color: $color-text-white;
+    font-weight: $font-weight-semibold;
+    margin-bottom: 8rpx;
+  }
+
+  .subGreeting {
+    font-size: $font-size-sm;
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.quickActions {
+  display: flex;
+  gap: $spacing-md;
+  margin: -40rpx $page-padding 0;
+  position: relative;
+  z-index: 2;
+}
+
+.actionCard {
+  flex: 1;
+  background-color: $color-bg-card;
+  border-radius: $radius-lg;
+  padding: $spacing-xl $spacing-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: $shadow-card;
+  transition: all $transition-base;
+
+  &:active {
+    transform: scale(0.96);
+    box-shadow: $shadow-card-hover;
+  }
+
+  .icon {
+    width: 80rpx;
+    height: 80rpx;
+    background: linear-gradient(135deg, $color-primary 0%, $color-primary-light 100%);
+    border-radius: $radius-lg;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: $spacing-md;
+
+    .iconText {
+      font-size: 40rpx;
+    }
+  }
+
+  &.scan {
+    .icon {
+      background: linear-gradient(135deg, $color-primary 0%, #4080ff 100%);
+    }
+  }
+
+  &.manual {
+    .icon {
+      background: linear-gradient(135deg, $color-success 0%, #23c34f 100%);
+    }
+  }
+
+  .title {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: 4rpx;
+  }
+
+  .desc {
+    font-size: $font-size-xs;
+    color: $color-text-tertiary;
+  }
+}
+
+.section {
+  margin: $spacing-xl $page-padding 0;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-md;
+
+  .title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+  }
+
+  .more {
+    font-size: $font-size-sm;
+    color: $color-text-tertiary;
+  }
+}
+
+.statsGrid {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.statCard {
+  flex: 1;
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg $spacing-md;
+  text-align: center;
+  box-shadow: $shadow-card;
+
+  .number {
+    font-size: $font-size-xxl;
+    font-weight: $font-weight-bold;
+    color: $color-primary;
+    margin-bottom: 8rpx;
+    line-height: 1.2;
+  }
+
+  &.urgent .number {
+    color: $color-error;
+  }
+
+  &.processing .number {
+    color: $color-warning;
+  }
+
+  &.completed .number {
+    color: $color-success;
+  }
+
+  .label {
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+  }
+}
+
+.orderList {
+  .orderItem {
+    margin-bottom: $spacing-md;
+  }
+}
+
+.priorityGuide {
+  background-color: $color-bg-card;
+  border-radius: $radius-md;
+  padding: $spacing-lg;
+  box-shadow: $shadow-card;
+
+  .guideTitle {
+    font-size: $font-size-md;
+    font-weight: $font-weight-semibold;
+    color: $color-text-primary;
+    margin-bottom: $spacing-md;
+  }
+
+  .guideList {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  .guideItem {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+
+    .dot {
+      width: 16rpx;
+      height: 16rpx;
+      border-radius: 50%;
+      flex-shrink: 0;
+
+      &.urgent { background-color: $color-error; }
+      &.high { background-color: $color-warning; }
+      &.medium { background-color: $color-primary; }
+      &.low { background-color: $color-success; }
+    }
+
+    .text {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      flex: 1;
+    }
+  }
+}

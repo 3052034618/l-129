@@ -1,0 +1,44 @@
+export const formatDate = (dateStr: string): string => {
+  return dateStr;
+};
+
+export const formatDuration = (minutes: number): string => {
+  if (minutes < 60) {
+    return `${minutes}分钟`;
+  }
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (mins === 0) {
+    return `${hours}小时`;
+  }
+  return `${hours}小时${mins}分钟`;
+};
+
+export const generateOrderNo = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+  return `WO${year}${month}${day}${random}`;
+};
+
+export const getStatusText = (status: string): string => {
+  const statusMap: Record<string, string> = {
+    pending: '待接单',
+    processing: '处理中',
+    completed: '已完成',
+    closed: '已关闭'
+  };
+  return statusMap[status] || status;
+};
+
+export const getPriorityText = (priority: string): string => {
+  const priorityMap: Record<string, string> = {
+    urgent: '紧急',
+    high: '高',
+    medium: '中',
+    low: '低'
+  };
+  return priorityMap[priority] || priority;
+};
